@@ -2,7 +2,6 @@ import socket
 
 BUFFER_SIZE = 1024
 
-
 class NCubeSocket:
     sock = None
     msgInfo = None
@@ -11,14 +10,13 @@ class NCubeSocket:
 
     def __init__(self, host, port):
         self.host = host
-        self.port = port
-
+        self.port = int(port)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.bind((host, port))
+        self.sock.bind((self.host, self.port))
 
     def close(self):
-        self.sock.shutdown(socket.SHUT_RDWR)
-        self.sock.close()
+        self.sock.shutdown(socket.SHUT_RDWR)    # SHUT_RDWP shutdown Read Buffer and Write Buffer both
+        # self.sock.close() # shutdown will close socket
 
     def recvMsg(self):
         try:
