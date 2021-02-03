@@ -32,6 +32,7 @@ import datetime
 # for Communicate with GCS
 from nCube import nCube
 
+nCubeUnit = None  # type: nCube.nCube
 # List of open terminal windows for macosx
 windowID = []
 
@@ -658,7 +659,7 @@ def start_mavproxy(opts, stuff):
     # FIXME: would be nice to e.g. "mavproxy.mavproxy(....).run"
     # rather than shelling out
 
-    global sitl_port
+    global nCubeUnit, gcsId, sitl_port
     
     extra_cmd = ""
     cmd = []
@@ -775,6 +776,11 @@ def start_mavproxy(opts, stuff):
             if stuff["sitl-port"] and not opts.no_rcin:
                 c.extend(["--sitl", "127.0.0.1:" + str(5501 + 10 * i)])
 
+        # Run nCube before MavProxy Blocking resources...
+        nCubeUnit = nCube.nCube(gcsId, sitl_port)
+        nCubeUnit.run()
+        
+        
         os.chdir(i_dir)
         if i == instances[-1]:
             run_cmd_blocking("Run MavProxy", cmd + c, env=env)
@@ -1125,7 +1131,8 @@ if cmd_opts.id is None:
     print("You have to input Drone ID registered in GCS")
     exit(1)
 else:
-    
+    gcsId = cmd_opts.id
+
 # validate parameters
 if cmd_opts.hil:
     if cmd_opts.valgrind:
@@ -1391,10 +1398,9 @@ try:
         wait_unlimited()
     else:
         start_mavproxy(cmd_opts, frame_infos)
-        nCubeUnit = nCube.nCube(gcsId, sitl_port)
-        nCubeUnit.run()
         
 except KeyboardInterrupt:
+    nCubeUnit.close()
     progress("Keyboard Interrupt received ...")
 
 sys.exit(0)

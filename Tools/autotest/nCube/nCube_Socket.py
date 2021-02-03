@@ -1,6 +1,6 @@
 import socket
 
-BUFFER_SIZE = 128
+BUFFER_SIZE = 1024
 
 
 class NCubeSocket:
@@ -16,15 +16,19 @@ class NCubeSocket:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((host, port))
 
-    def __del__(self):
+    def close(self):
+        self.sock.shutdown(socket.SHUT_RDWR)
         self.sock.close()
 
     def recvMsg(self):
-
-        data, msgInfo = self.sock.recvfrom(BUFFER_SIZE)
-        if((self.msgInfo is None) or (self.msgInfo != msgInfo)):
-            self.msgInfo = msgInfo
-        return data
+        try:
+            data, msgInfo = self.sock.recvfrom(BUFFER_SIZE)
+            if((self.msgInfo is None) or (self.msgInfo != msgInfo)):
+                self.msgInfo = msgInfo
+            return data
+        except BaseException as err:
+            print(err)
+            return ""
 
     def sendMsg(self, msg):
         if(not (self.msgInfo is None)):
