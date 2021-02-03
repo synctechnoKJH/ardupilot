@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# coding=utf-8
 """
 Framework to start a simulated vehicle and connect it to MAVProxy.
 
@@ -28,6 +28,9 @@ from pysim import vehicleinfo
 
 import time
 import datetime
+
+# for Communicate with GCS
+from nCube import nCube
 
 # List of open terminal windows for macosx
 windowID = []
@@ -655,6 +658,8 @@ def start_mavproxy(opts, stuff):
     # FIXME: would be nice to e.g. "mavproxy.mavproxy(....).run"
     # rather than shelling out
 
+    global sitl_port
+    
     extra_cmd = ""
     cmd = []
     if under_cygwin():
@@ -717,6 +722,7 @@ def start_mavproxy(opts, stuff):
     # to use -C :-)
     for out in opts.out:
         cmd.extend(['--out', out])
+        sitl_port = out
     if opts.map:
         cmd.append('--map')
     if opts.console:
@@ -757,6 +763,7 @@ def start_mavproxy(opts, stuff):
                     c.extend(["--out", "10.0.2.2:" + str(port)])
                 else:
                     c.extend(["--out", "127.0.0.1:" + str(port)])
+                    sitl_port = port
 
         if opts.hil:
             c.extend(["--load-module", "HIL"])
@@ -774,8 +781,10 @@ def start_mavproxy(opts, stuff):
         else:
             run_in_terminal_window("Run MavProxy", cmd + c, env=env)
     os.chdir(old_dir)
+    return sitl_port
 
-
+def start_nCube(id, port):
+    
 vehicle_options_string = '|'.join(vinfo.options.keys())
 
 
@@ -1042,6 +1051,11 @@ group_sim.add_option("", "--sysid",
                      type='int',
                      default=None,
                      help="Set SYSID_THISMAV")
+group_sim.add_option("", "--id",
+                     type='string',
+                     default=None,
+                     help="Set Drone ID")
+
 parser.add_option_group(group_sim)
 
 
@@ -1101,9 +1115,19 @@ atexit.register(kill_tasks)
 
 progress("Start")
 
+# Drone GCS ID
+gcsId = None
+sitl_port = 0
+
 if cmd_opts.sim_vehicle_sh_compatible and cmd_opts.jobs is None:
     cmd_opts.jobs = 1
+# check Drone ID
 
+if cmd_opts.id is None:
+    print("You have to input Drone ID registered in GCS")
+    exit(1)
+else:
+    
 # validate parameters
 if cmd_opts.hil:
     if cmd_opts.valgrind:
@@ -1369,6 +1393,9 @@ try:
         wait_unlimited()
     else:
         start_mavproxy(cmd_opts, frame_infos)
+        nCubeUnit = nCube.nCube(gcsId, sitl_port)
+        nCubeUnit.run()
+        
 except KeyboardInterrupt:
     progress("Keyboard Interrupt received ...")
 
