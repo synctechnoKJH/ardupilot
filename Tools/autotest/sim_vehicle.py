@@ -782,8 +782,6 @@ def start_mavproxy(opts, stuff):
             run_in_terminal_window("Run MavProxy", cmd + c, env=env)
     os.chdir(old_dir)
     return sitl_port
-
-def start_nCube(id, port):
     
 vehicle_options_string = '|'.join(vinfo.options.keys())
 
