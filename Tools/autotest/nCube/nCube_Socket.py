@@ -15,7 +15,10 @@ class NCubeSocket:
         self.sock.bind((self.host, self.port))
 
     def close(self):
-        self.sock.shutdown(socket.SHUT_RDWR)    # SHUT_RDWP shutdown Read Buffer and Write Buffer both
+        try:
+            self.sock.shutdown(socket.SHUT_RDWR)    # SHUT_RDWP shutdown Read and Write both Buffers
+        except socket.error as err:
+            print(err)
         # self.sock.close() # shutdown will close socket
 
     def recvMsg(self):
