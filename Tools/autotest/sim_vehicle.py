@@ -1257,8 +1257,8 @@ elif cmd_opts.location is not None:
     location = find_location_by_name(cmd_opts.location)
     progress("Starting up at %s (%s)" % (location, cmd_opts.location))
 else:
-    progress("Starting up at SITL location")
-    location = None
+    location = find_location_by_name("SYNC")
+    progress("Starting up at %s (%s)" % (location, cmd_opts.location))
 if cmd_opts.swarm is not None:
     offsets = find_offsets(instances, cmd_opts.swarm)
 else:
