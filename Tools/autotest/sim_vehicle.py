@@ -1207,12 +1207,16 @@ if cmd_opts.vehicle in vehicle_map:
 
 # try to validate vehicle
 if cmd_opts.vehicle not in vinfo.options:
+    cmd_opts.vehicle = 'ArduCopter'
+    progress('''** default vehicle is ArduCopter **''')
+    """
     progress('''
 ** Is (%s) really your vehicle type?
 Perhaps you could try -v %s
 You could also try changing directory to e.g. the ArduCopter subdirectory
 ''' % (cmd_opts.vehicle, vehicle_options_string))
     sys.exit(1)
+    """
 
 # determine frame options (e.g. build type might be "sitl")
 if cmd_opts.frame is None:
