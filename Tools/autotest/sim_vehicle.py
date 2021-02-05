@@ -32,6 +32,10 @@ import datetime
 # for Communicate with GCS
 from nCube import nCube
 
+"""
+    Synctechno KJH
+    SITL Agency, receive Mqtt message and send Mavlink packet to Mobius
+"""
 nCubeUnit = None  # type: nCube.nCube
 # List of open terminal windows for macosx
 windowID = []
@@ -776,7 +780,17 @@ def start_mavproxy(opts, stuff):
             if stuff["sitl-port"] and not opts.no_rcin:
                 c.extend(["--sitl", "127.0.0.1:" + str(5501 + 10 * i)])
 
-        # Run nCube before MavProxy Blocking resources...
+        """
+            Synctechno KJH
+            for running Mavproxy by daemon mode
+        """
+        c.extend(["--daemon"])
+        
+
+        """
+            Synctechno KJH
+            Run nCube before MavProxy Blocking resources...
+        """
         nCubeUnit = nCube.nCube(gcsId, sitl_port)
         nCubeUnit.run()
         
@@ -1055,6 +1069,10 @@ group_sim.add_option("", "--sysid",
                      type='int',
                      default=None,
                      help="Set SYSID_THISMAV")
+"""
+    Synctechno KJH
+    add Custom Option for receiving Vehicle ID registered in GCS
+"""
 group_sim.add_option("", "--id",
                      type='string',
                      default=None,
@@ -1207,6 +1225,12 @@ if cmd_opts.vehicle in vehicle_map:
 
 # try to validate vehicle
 if cmd_opts.vehicle not in vinfo.options:
+    """
+        Synctechno KJH
+        set default vehicle type to 'ArduCopter'
+        because '-v' was almost necessary option
+        now, no need input -v option when run sim_vehicle.py         
+    """
     cmd_opts.vehicle = 'ArduCopter'
     progress('''** default vehicle is ArduCopter **''')
     """
@@ -1257,6 +1281,10 @@ elif cmd_opts.location is not None:
     location = find_location_by_name(cmd_opts.location)
     progress("Starting up at %s (%s)" % (location, cmd_opts.location))
 else:
+    """
+        Synctechno KJH
+        set default location to Synctechno real location
+    """
     location = find_location_by_name("SYNC")
     progress("Starting up at %s (%s)" % (location, cmd_opts.location))
 if cmd_opts.swarm is not None:
@@ -1404,6 +1432,10 @@ try:
         start_mavproxy(cmd_opts, frame_infos)
         
 except KeyboardInterrupt:
+    """
+        Synctechno KJH
+        close nCube safely
+    """
     nCubeUnit.close()
     progress("Keyboard Interrupt received ...")
 
